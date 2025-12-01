@@ -1,0 +1,33 @@
+name: Daily Job Search
+
+on:
+  schedule:
+    - cron: "30 2 * * *"   # Runs at 02:30 UTC = 08:00 AM IST
+  workflow_dispatch:       # Allows manual run
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run job search script
+        run: python search_jobs.py
+
+      - name: Commit results
+        run: |
+          git config --global user.name "job-bot"
+          git config --global user.email "bot@example.com"
+          git add latest_jobs.json
+          git commit -m "Daily job update" || echo "No changes to commit"
+          git push
